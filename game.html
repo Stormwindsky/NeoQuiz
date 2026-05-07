@@ -2,39 +2,200 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NeoQuiz - Game</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;800&display=swap" rel="stylesheet">
-    <!-- Style similaire à index.html (abrégé ici pour la lecture) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        /* Réutiliser le CSS de l'étape précédente ici */
-        :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #8b5cf6; --success: #22c55e; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; text-align: center; }
-        .container { max-width: 600px; margin: 50px auto; background: var(--card); padding: 2rem; border-radius: 20px; }
+        :root {
+            --bg: #0f172a; --card: #1e293b; --text: #f8fafc;
+            --accent: #8b5cf6; --success: #22c55e;
+            --red: #ef4444; --blue: #3b82f6; --yellow: #f59e0b; --green: #10b981;
+        }
+        * { box-sizing: border-box; transition: all 0.2s ease; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
+        .container { max-width: 600px; width: 90%; margin: 50px auto; background: var(--card); padding: 2.5rem; border-radius: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); text-align: center; }
         .hidden { display: none !important; }
-        input { width: 80%; padding: 10px; margin: 10px; border-radius: 8px; border: none; }
-        .btn { padding: 15px 30px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin: 10px; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 12px; border: 2px solid #334155; background: #0f172a; color: white; font-size: 1rem; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 1rem; margin-top: 10px; }
         .btn-primary { background: var(--accent); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .back-link { color: white; text-decoration: none; position: absolute; top: 20px; left: 20px; font-weight: 600; }
+        #room-badge { background: var(--success); color: white; padding: 5px 15px; border-radius: 8px; font-weight: bold; font-size: 1.2rem; margin: 10px 0; display: inline-block; }
+        .quiz-grid { display: grid; gap: 15px; margin-top: 30px; }
+        .grid-4 { grid-template-columns: 1fr 1fr; }
+        .grid-2 { grid-template-columns: 1fr; }
+        .answer-btn { height: 100px; border-radius: 16px; border: none; font-size: 2rem; color: white; cursor: pointer; }
+        .b-1 { background: var(--red); } .b-2 { background: var(--blue); }
+        .b-3 { background: var(--yellow); } .b-4 { background: var(--green); }
+        .player-tag { background: #334155; padding: 6px 12px; border-radius: 20px; margin: 5px; display: inline-block; }
     </style>
 </head>
 <body>
-    <a href="index.html" style="color: white; position: absolute; top: 20px; left: 20px;">← Back</a>
-    
+
+    <a href="index.html" class="back-link">← <span data-i18n="back">Back</span></a>
+
     <div id="screen-home" class="container">
-        <h2 id="title-game">Game Mode</h2>
-        <button class="btn btn-primary" onclick="initHost()">HOST (Teacher)</button>
-        <hr style="opacity: 0.2">
-        <input type="text" id="join-id" placeholder="Room Code">
-        <input type="text" id="player-name" placeholder="Your Name">
-        <button class="btn" style="background: var(--success); color: white;" onclick="initPlayer()">JOIN</button>
+        <h2 id="title-game" data-i18n="welcome">Game Mode</h2>
+        <button class="btn btn-primary" onclick="initHost()" data-i18n="host_btn">HOST (Teacher)</button>
+        <div style="margin: 20px 0; opacity: 0.3;">—</div>
+        <input type="text" id="join-id" data-i18n-holder="enter_code" placeholder="Room Code">
+        <input type="text" id="player-name" data-i18n-holder="enter_name" placeholder="Your Name">
+        <button class="btn btn-success" onclick="initPlayer()" data-i18n="join_btn">JOIN</button>
     </div>
 
-    <!-- Le reste de la logique Lobby / Quiz est identique au code précédent -->
-    <!-- Note : Remplacer l'accept=".json" par accept=".NQ,.json" dans l'input file -->
-    
+    <div id="screen-lobby" class="container hidden">
+        <h2 data-i18n="lobby_title">Lobby</h2>
+        <div id="host-controls" class="hidden">
+            <p data-i18n="share_code">Game Code:</p>
+            <div id="room-badge">...</div>
+            <input type="file" id="file-input" accept=".NQ,.json">
+            <p style="font-size: 0.8rem; opacity: 0.6" data-i18n="json_hint">Upload your .NQ quiz</p>
+        </div>
+        <div id="player-status" class="hidden">
+            <p data-i18n="waiting_host">Connected! Waiting for host...</p>
+        </div>
+        <div id="player-list" style="margin-top: 20px;"></div>
+        <button id="start-btn" class="btn btn-primary hidden" onclick="startQuiz()" data-i18n="start_game">Launch Quiz 🚀</button>
+    </div>
+
+    <div id="screen-quiz" class="container hidden">
+        <div id="host-view" class="hidden">
+            <h2 id="q-text">Question</h2>
+            <div style="font-size: 4rem; font-weight: 800;" id="answer-count">0</div>
+            <p data-i18n="answers_received">Answers received</p>
+        </div>
+        <div id="player-view" class="hidden">
+            <div id="btn-container" class="quiz-grid"></div>
+        </div>
+    </div>
+
     <script>
-        const lang = localStorage.getItem('neoquiz_lang') || 'en';
-        // Logique PeerJS identique...
+        // --- TRANSLATION LOGIC ---
+        const i18n = {
+            en: {
+                back: "Back", welcome: "Game Mode", host_btn: "HOST (Teacher)", join_btn: "JOIN",
+                enter_code: "Room Code", enter_name: "Your Name", lobby_title: "Game Lobby",
+                share_code: "Game Code:", json_hint: "Upload your .NQ or .json quiz",
+                waiting_host: "Connected! Waiting for host...", start_game: "Launch Quiz 🚀",
+                answers_received: "Answers received"
+            },
+            fr: {
+                back: "Retour", welcome: "Mode de Jeu", host_btn: "HÔTE (Prof)", join_btn: "REJOINDRE",
+                enter_code: "Code de la salle", enter_name: "Ton Nom", lobby_title: "Salon d'attente",
+                share_code: "Code de la partie :", json_hint: "Charge ton fichier .NQ ou .json",
+                waiting_host: "Connecté ! En attente du prof...", start_game: "Lancer le Quiz 🚀",
+                answers_received: "Réponses reçues"
+            }
+        };
+
+        const currentLang = localStorage.getItem('neoquiz_lang') || 'en';
+        function updateUI() {
+            document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = i18n[currentLang][el.getAttribute('data-i18n')]);
+            document.querySelectorAll('[data-i18n-holder]').forEach(el => el.placeholder = i18n[currentLang][el.getAttribute('data-i18n-holder')]);
+        }
+        updateUI();
+
+        // --- GAME LOGIC ---
+        let peer, conn, connections = [], quizData = [], currentQ = 0, players = {}, answersReceived = 0;
+
+        function initHost() {
+            peer = new Peer();
+            peer.on('open', id => {
+                document.getElementById('room-badge').innerText = id;
+                showScreen('screen-lobby');
+                document.getElementById('host-controls').classList.remove('hidden');
+            });
+            peer.on('connection', c => {
+                c.on('data', d => {
+                    if(d.type === 'JOIN') { players[c.peer] = {name: d.name, score: 0}; connections.push(c); renderPlayers(); }
+                    if(d.type === 'ANSWER') handleAnswer(c.peer, d.index);
+                });
+            });
+            document.getElementById('file-input').onchange = (e) => {
+                const r = new FileReader();
+                r.onload = (v) => { quizData = JSON.parse(v.target.result); document.getElementById('start-btn').classList.remove('hidden'); };
+                r.readAsText(e.target.files[0]);
+            };
+        }
+
+        function initPlayer() {
+            const id = document.getElementById('join-id').value;
+            const name = document.getElementById('player-name').value;
+            if(!id || !name) return;
+            peer = new Peer();
+            peer.on('open', () => {
+                conn = peer.connect(id);
+                conn.on('open', () => {
+                    conn.send({type:'JOIN', name: name});
+                    showScreen('screen-lobby');
+                    document.getElementById('player-status').classList.remove('hidden');
+                });
+                conn.on('data', d => {
+                    if(d.type === 'START_Q') {
+                        renderPlayerButtons(d.count);
+                        showScreen('screen-quiz');
+                        document.getElementById('player-view').classList.remove('hidden');
+                    }
+                    if(d.type === 'END') alert("Game Finished!");
+                });
+            });
+        }
+
+        function renderPlayerButtons(count) {
+            const container = document.getElementById('btn-container');
+            container.className = count === 2 ? "quiz-grid grid-2" : "quiz-grid grid-4";
+            let html = '';
+            const shapes = ['▲', '◆', '●', '■'];
+            for(let i=0; i<count; i++) {
+                html += `<button class="answer-btn b-${i+1}" onclick="sendAnswer(${i})">${shapes[i]}</button>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function startQuiz() {
+            showScreen('screen-quiz');
+            document.getElementById('host-view').classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            answersReceived = 0;
+            document.getElementById('answer-count').innerText = "0";
+            const q = quizData[currentQ];
+            document.getElementById('q-text').innerText = q.question;
+            broadcast({type: 'START_Q', count: q.options.length});
+        }
+
+        function handleAnswer(pId, idx) {
+            if(idx === quizData[currentQ].answer) players[pId].score += 100;
+            answersReceived++;
+            document.getElementById('answer-count').innerText = answersReceived;
+            if(answersReceived >= connections.length) {
+                currentQ++;
+                if(currentQ < quizData.length) setTimeout(showQuestion, 2000);
+                else { 
+                    document.getElementById('q-text').innerText = "Game Over!"; 
+                    broadcast({type: 'END'});
+                }
+            }
+        }
+
+        function sendAnswer(idx) {
+            conn.send({type: 'ANSWER', index: idx});
+            document.getElementById('player-view').classList.add('hidden');
+        }
+
+        function renderPlayers() {
+            document.getElementById('player-list').innerHTML = Object.values(players).map(p => `<span class="player-tag">${p.name}</span>`).join('');
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function broadcast(d) { connections.forEach(c => c.send(d)); }
     </script>
 </body>
 </html>
