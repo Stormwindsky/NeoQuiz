@@ -3,27 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>NeoQuiz Editor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --accent: #8b5cf6; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: white; padding: 20px; }
         .editor-container { max-width: 800px; margin: auto; background: var(--card); padding: 30px; border-radius: 20px; }
-        .q-block { background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid var(--accent); position: relative; }
+        .q-block { background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid var(--accent); animation: fadeIn 0.3s ease; }
         input, select { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: white; }
         .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; }
         .save-btn { background: #22c55e; color: white; width: 100%; font-size: 1.2rem; margin-top: 20px; }
-        .row { display: flex; gap: 10px; }
-        .delete-btn { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; float: right; }
-        small { color: #94a3b8; font-size: 0.8rem; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
     <div class="editor-container">
         <a href="index.html" style="color: #94a3b8; text-decoration: none;">← Back to Menu</a>
-        <h2 id="edit-title">NeoQuiz Editor</h2>
+        <h2>NeoQuiz Editor</h2>
         <div id="questions-list"></div>
         <button class="btn" style="background: var(--accent); color: white;" onclick="addQuestion()">+ Add Question</button>
-        <hr style="border: 0.5px solid #334155; margin: 20px 0;">
         <button class="save-btn btn" onclick="exportNQ()">DOWNLOAD .NQ FILE</button>
     </div>
 
@@ -32,57 +30,39 @@
             const id = Date.now();
             const html = `
                 <div class="q-block" id="q-${id}">
-                    <button class="delete-btn" onclick="document.getElementById('q-${id}').remove()">X</button>
-                    <div class="row">
-                        <select class="q-type" onchange="updateFields(${id}, this.value)">
-                            <option value="quiz">Quiz (Multiple Choice)</option>
-                            <option value="tf">True/False</option>
-                            <option value="puzzle">Puzzle (Order)</option>
-                            <option value="slider">Slider (Numeric)</option>
-                        </select>
-                        <select class="q-time">
-                            <option value="0">No Limit (Infinite)</option>
-                            <option value="5">5 Seconds</option>
-                            <option value="10">10 Seconds</option>
-                            <option value="20">20 Seconds</option>
-                            <option value="30">30 Seconds</option>
-                            <option value="60">1 Minute</option>
-                            <option value="300">5 Minutes</option>
-                            <option value="900">15 Minutes</option>
-                        </select>
+                    <div style="display:flex; gap:10px">
+                        <select class="q-type"><option value="quiz">Quiz</option><option value="tf">True/False</option><option value="puzzle">Puzzle</option><option value="slider">Slider</option></select>
+                        <select class="q-time"><option value="0">No Limit (Infinite)</option><option value="5">5s</option><option value="10">10s</option><option value="20">20s</option><option value="30">30s</option><option value="60">1m</option></select>
                     </div>
                     <input type="text" placeholder="Question Text" class="q-text">
-                    <input type="text" placeholder="Media URL (Image, MP4, MP3...)" class="q-media">
-                    <div id="options-${id}">
-                        <input type="text" placeholder="Option 1" class="opt">
-                        <input type="text" placeholder="Option 2" class="opt">
-                        <input type="text" placeholder="Option 3" class="opt">
-                        <input type="text" placeholder="Option 4" class="opt">
-                    </div>
-                    <input type="text" placeholder="Correct Answer (Index, Order, or Number)" class="correct">
-                </div>
-            `;
+                    <input type="text" placeholder="Media URL (Image/Video)" class="q-media">
+                    <input type="text" placeholder="Option 1" class="opt"> <input type="text" placeholder="Option 2" class="opt">
+                    <input type="text" placeholder="Option 3" class="opt"> <input type="text" placeholder="Option 4" class="opt">
+                    <input type="text" placeholder="Correct Answer (Index or Value)" class="correct">
+                    <button onclick="this.parentElement.remove()" style="background:#ef4444; color:white; border:none; border-radius:5px; padding:5px 10px; cursor:pointer; margin-top:10px;">Delete</button>
+                </div>`;
             document.getElementById('questions-list').insertAdjacentHTML('beforeend', html);
         }
-        function updateFields(id, type) {
-            document.getElementById(`options-${id}`).style.display = (type === 'slider') ? 'none' : 'block';
-        }
-        function exportNQ() {
+
+        async function exportNQ() {
             const list = [];
             document.querySelectorAll('.q-block').forEach(block => {
-                const opts = Array.from(block.querySelectorAll('.opt')).map(i => i.value).filter(v => v !== "");
                 list.push({
                     type: block.querySelector('.q-type').value,
                     time: parseInt(block.querySelector('.q-time').value),
                     question: block.querySelector('.q-text').value,
                     media: block.querySelector('.q-media').value,
-                    options: opts,
+                    options: Array.from(block.querySelectorAll('.opt')).map(o => o.value).filter(v => v !== ""),
                     answer: block.querySelector('.correct').value
                 });
             });
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(list));
+            const zip = new JSZip();
+            zip.file("quiz.json", JSON.stringify(list));
+            zip.folder("Customs");
+            const content = await zip.generateAsync({type:"blob"});
             const dl = document.createElement('a');
-            dl.href = dataStr; dl.download = "my_quiz.NQ";
+            dl.href = URL.createObjectURL(content);
+            dl.download = "quiz_package.NQ";
             dl.click();
         }
         addQuestion();
