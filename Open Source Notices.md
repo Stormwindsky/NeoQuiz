@@ -29,6 +29,9 @@ Copyright (c) 2024 Stormwindsky.
 - **Use**: Typography.
 - **License**: [SIL Open Font License 1.1](https://scripts.sil.org/OFL).
 
+  ### JSZip
+- **Use**: Creating Quiz Files.
+- **License**: [GPL version 3](https://github.com/Stuk/jszip?tab=License-1-ov-file#gpl-version-3).
 ---
 
 ## 3. Contact
