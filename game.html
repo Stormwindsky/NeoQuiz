@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NeoQuiz - Game</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    <!-- Style similaire à index.html (abrégé ici pour la lecture) -->
+    <style>
+        /* Réutiliser le CSS de l'étape précédente ici */
+        :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #8b5cf6; --success: #22c55e; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; text-align: center; }
+        .container { max-width: 600px; margin: 50px auto; background: var(--card); padding: 2rem; border-radius: 20px; }
+        .hidden { display: none !important; }
+        input { width: 80%; padding: 10px; margin: 10px; border-radius: 8px; border: none; }
+        .btn { padding: 15px 30px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin: 10px; }
+        .btn-primary { background: var(--accent); color: white; }
+    </style>
+</head>
+<body>
+    <a href="index.html" style="color: white; position: absolute; top: 20px; left: 20px;">← Back</a>
+    
+    <div id="screen-home" class="container">
+        <h2 id="title-game">Game Mode</h2>
+        <button class="btn btn-primary" onclick="initHost()">HOST (Teacher)</button>
+        <hr style="opacity: 0.2">
+        <input type="text" id="join-id" placeholder="Room Code">
+        <input type="text" id="player-name" placeholder="Your Name">
+        <button class="btn" style="background: var(--success); color: white;" onclick="initPlayer()">JOIN</button>
+    </div>
+
+    <!-- Le reste de la logique Lobby / Quiz est identique au code précédent -->
+    <!-- Note : Remplacer l'accept=".json" par accept=".NQ,.json" dans l'input file -->
+    
+    <script>
+        const lang = localStorage.getItem('neoquiz_lang') || 'en';
+        // Logique PeerJS identique...
+    </script>
+</body>
+</html>

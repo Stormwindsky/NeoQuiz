@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NeoQuiz Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #8b5cf6; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: white; padding: 20px; }
+        .editor-container { max-width: 800px; margin: auto; background: var(--card); padding: 30px; border-radius: 20px; }
+        .q-block { background: #0f172a; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid var(--accent); }
+        input { width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #334155; background: #1e293b; color: white; }
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; }
+        .save-btn { background: #22c55e; color: white; width: 100%; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <a href="index.html" style="color: #94a3b8; text-decoration: none;">← Back to Menu</a>
+        <h2 id="edit-title">NeoQuiz Editor</h2>
+        <div id="questions-list"></div>
+        <button class="btn" style="background: var(--accent); color: white;" onclick="addQuestion()">+ Add Question</button>
+        <hr>
+        <button class="save-btn btn" onclick="exportNQ()">DOWNLOAD .NQ FILE</button>
+    </div>
+
+    <script>
+        let questions = [];
+
+        function addQuestion() {
+            const id = Date.now();
+            const html = `
+                <div class="q-block" id="q-${id}">
+                    <input type="text" placeholder="Question Text" class="q-text">
+                    <input type="text" placeholder="Option 1" class="opt">
+                    <input type="text" placeholder="Option 2" class="opt">
+                    <input type="text" placeholder="Option 3 (Leave empty for True/False)" class="opt">
+                    <input type="text" placeholder="Option 4 (Leave empty for True/False)" class="opt">
+                    <input type="number" placeholder="Correct Index (0, 1, 2 or 3)" class="correct">
+                    <button onclick="document.getElementById('q-${id}').remove()" style="background:red; color:white; border:none; border-radius:5px; cursor:pointer;">Delete</button>
+                </div>
+            `;
+            document.getElementById('questions-list').insertAdjacentHTML('beforeend', html);
+        }
+
+        function exportNQ() {
+            const list = [];
+            document.querySelectorAll('.q-block').forEach(block => {
+                const opts = Array.from(block.querySelectorAll('.opt')).map(i => i.value).filter(v => v !== "");
+                list.push({
+                    question: block.querySelector('.q-text').value,
+                    options: opts,
+                    answer: parseInt(block.querySelector('.correct').value)
+                });
+            });
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(list));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "my_quiz.NQ");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // Initialiser avec une question
+        addQuestion();
+    </script>
+</body>
+</html>
