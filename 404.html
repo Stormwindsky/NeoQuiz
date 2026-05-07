@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - NeoQuiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --accent: #8b5cf6;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .container {
+            background: var(--card);
+            padding: 3rem;
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+            max-width: 400px;
+            width: 90%;
+        }
+        h1 {
+            font-size: 8rem;
+            margin: 0;
+            line-height: 1;
+            background: linear-gradient(to bottom, var(--accent), #5b21b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+        p {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+        }
+        .btn-home {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background: var(--accent);
+            border-radius: 20px; /* Style un peu plus moderne que le rond parfait */
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.4);
+        }
+        .btn-home:hover {
+            transform: scale(1.1) rotate(-2deg);
+            box-shadow: 0 15px 20px -3px rgba(139, 92, 246, 0.6);
+        }
+        /* Style spécifique pour l'icône SVG House */
+        .house-icon {
+            width: 45px;
+            height: 45px;
+            fill: white; /* Force la couleur blanche de l'icône CC0 */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>404</h1>
+        <p id="error-msg">Page Not Found</p>
+        
+        <a href="index.html" class="btn-home">
+            <!-- SVG OpenClipArt House 1 (Simplifié pour le web) -->
+            <svg class="house-icon" viewBox="0 0 541.01 541.01">
+                <path d="M541.01,310.875l-44.577,44.577L270.5,129.516L44.577,355.452L0,310.875L270.5,40.375L541.01,310.875z M107.82,298.541 v202.094h119.825V356.559h85.711v144.076h119.833V298.541L270.5,135.856L107.82,298.541z"/>
+            </svg>
+        </a>
+    </div>
+
+    <script>
+        // Synchronisation de la langue avec localStorage
+        const lang = localStorage.getItem('neoquiz_lang') || 'en';
+        const msgEl = document.getElementById('error-msg');
+        
+        if (lang === 'fr') {
+            msgEl.innerText = "Page Introuvable";
+        } else {
+            msgEl.innerText = "Page Not Found";
+        }
+    </script>
+
+</body>
+</html>
