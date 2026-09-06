@@ -2,9 +2,12 @@
 
 This project, **NeoQuiz**, is built using several open-source libraries and assets. Below is the legal information regarding their licenses.
 
-## 1. Project License
-**NeoQuiz** itself is licensed under the **GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later)**. 
-Copyright (c) 2026 Stormwindsky.
+## 1. Project License & Assets
+
+- **Source Code**: **NeoQuiz** source code is licensed under the **GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later)**.  
+  Copyright (c) 2026 Stormwindsky.
+
+- **Assets Folder**: All files, graphics, audio, and subfolders located within the [`/Assets`](https://github.com/Stormwindsky/NeoQuiz/tree/main/Assets) directory are released into the public domain under the **Creative Commons CC0 1.0 Universal (CC0 1.0)** license
 
 ---
 
