@@ -3,8 +3,8 @@
 This project, **NeoQuiz**, is built using several open-source libraries and assets. Below is the legal information regarding their licenses.
 
 ## 1. Project License
-**NeoQuiz** itself is licensed under the **GNU General Public License v3.0 (GPL-3.0)**. 
-Copyright (c) 2024 Stormwindsky.
+**NeoQuiz** itself is licensed under the **GNU Affero General Public License v3.0 or later (AGPL-3.0-or-later)**. 
+Copyright (c) 2026 Stormwindsky.
 
 ---
 
